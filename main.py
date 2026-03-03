@@ -1,6 +1,34 @@
 import os
 import telebot
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
+# ============================================
+# ПРОСТОЙ ВЕБ-СЕРВЕР ДЛЯ RENDER
+# ============================================
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+    
+    def log_message(self, format, *args):
+        # Отключаем логирование запросов, чтобы не засорять консоль
+        pass
+
+def run_webserver():
+    port = int(os.environ.get('PORT', 10000))  # Render даёт порт через переменную PORT
+    server = HTTPServer(('0.0.0.0', port), SimpleHandler)
+    print(f"🌐 Веб-сервер запущен на порту {port}")
+    server.serve_forever()
+
+# Запускаем веб-сервер в отдельном потоке
+webserver_thread = threading.Thread(target=run_webserver, daemon=True)
+webserver_thread.start()
+
+# ============================================
+# ОСНОВНОЙ КОД БОТА
+# ============================================
 TOKEN = os.environ.get('BOT_TOKEN')
 if TOKEN is None:
     print("Ошибка: токен не найден")
@@ -331,5 +359,8 @@ Stone Island — это **про технологии, моду и исслед�
 
 Или задай вопрос своими словами — я постараюсь понять!""")
 
-print("🔥 Бот запущен с МАКСИМАЛЬНО ПОДРОБНЫМИ ответами!")
+# ============================================
+# ЗАПУСК БОТА
+# ============================================
+print("🔥 Бот запущен с веб-сервером для Render!")
 bot.polling(none_stop=True)
