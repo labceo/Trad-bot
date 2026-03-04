@@ -2,7 +2,27 @@ import os
 import telebot
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
+import os
 
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is alive!")
+    def log_message(self, format, *args):
+        pass  # Отключаем логирование
+
+def run_webserver():
+    port = int(os.environ.get('PORT', 10000))
+    server = HTTPServer(('0.0.0.0', port), SimpleHandler)
+    print(f"🌐 Веб-сервер запущен на порту {port}")
+    server.serve_forever()
+
+# Запускаем веб-сервер в отдельном потоке
+webserver_thread = threading.Thread(target=run_webserver, daemon=True)
+webserver_thread.start()
 # ============================================
 # ВЕБ-СЕРВЕР ДЛЯ RENDER
 # ============================================
